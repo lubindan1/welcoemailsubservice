@@ -8,6 +8,7 @@ import java.util.Set;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.jboss.logging.Logger;
 
 import com.lambdus.emailengine.persistence.TemplatePersist;
 import com.lambdus.emailengine.persistence.SessionFactoryUtil;
@@ -17,20 +18,24 @@ import redis.clients.jedis.Jedis;
 
 public class MessageAssembler {
 	
-	String template;
-	String assembledMessage;
-	String subjectLine;
-	String fromAddress; 
+	private static final Logger log = Logger.getLogger(MessageAssembler.class.getName());
+	
+	public String template;
+	public String assembledMessage;
+	public String subjectLine;
+	public String fromAddress;
 	
 	
 	public MessageAssembler(int templateId, HashMap<String, String> tokenKVPairs)
 	{
+		log.info("called constructor");
 		getTemplate(templateId);
 		this.assembledMessage = replaceTokens(this.template, tokenKVPairs);
 	}
 	
 	public void getTemplate(int templateId)
 	{
+		log.info("called getTemplate");
 		checkCache(templateId);
 	}
 	
@@ -49,11 +54,13 @@ public class MessageAssembler {
 	
 	private void checkCache(int templateId)
 	{
+		log.info("called checkCache");
 	   //Redis in-memory cache key-value	
 	   Jedis jedis = new Jedis("localhost");
 	   
 	   if (jedis.exists(String.valueOf(templateId)))
 	   {
+		   log.info("exists in Redis");
 	       String[] templateVarargs = {"creative","subjectline","fromaddress"};
   	       List<String> templateVals  = jedis.hmget(String.valueOf(templateId), templateVarargs);
   	 	   this.template = templateVals.get(0);
@@ -62,6 +69,7 @@ public class MessageAssembler {
 	   }
 	   else
 	   {
+		   log.info("go to Database");
 		   TemplatePersist templateData = retrieveTemplateFromDB(templateId);
   	 	   this.template = templateData.getCreative();
   		   this.subjectLine = templateData.getSubjectline();
@@ -75,11 +83,14 @@ public class MessageAssembler {
 	
 	private TemplatePersist retrieveTemplateFromDB(int templateId)
 	{
+		log.info("call from retrieveTemplateFromDB");
 		Session session = SessionFactoryUtil.getSessionFactory().getCurrentSession();
 		session.getTransaction().begin();
         Criteria cb = session.createCriteria(TemplatePersist.class);
         TemplatePersist result = (TemplatePersist) cb.add(Restrictions.eq("id",templateId)).uniqueResult();
         session.getTransaction().commit();
+        
+        log.info(result);
 		
         return result;
 	}

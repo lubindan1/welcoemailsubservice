@@ -10,7 +10,6 @@
     <!-- hibernate dialect -->
     <property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
 
-    
     <property name="hibernate.connection.driver_class">com.mysql.jdbc.jdbc2.optional.MysqlXADataSource</property>
     <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/email_engine</property>
     <property name="hibernate.connection.username">dan</property>
@@ -19,8 +18,8 @@
    
     <property name="hibernate.cache.provider_class">org.hibernate.cache.HashtableCacheProvider</property>
     <property name="current_session_context_class">thread</property>
-
-    <!--  <mapping resource="com/lambdus/emailengine/persistence/TemplatePersist.hbm.xml"/> -->
+    
+    <!-- <mapping resource="com/lambdus/emailengine/persistence/TemplatePersist.hbm.xml"/> -->
 
 </session-factory>
 </hibernate-configuration>

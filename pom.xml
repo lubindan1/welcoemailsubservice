@@ -20,10 +20,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.lambdus.emailengine</groupId>
-    <artifactId>LambdusEmailEngine</artifactId>
+    <artifactId>EmailEngine</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>war</packaging>
-    <name>LambdusEmailEngine</name>
+    <name>EmailEngine</name>
     <description>A starter Java EE 6 webapp project for use on JBoss AS 7 / EAP 6, generated from the jboss-javaee6-webapp archetype</description>
 
     <url>http://jboss.org/jbossas</url>
@@ -66,6 +66,7 @@
 
     <dependencyManagement>
         <dependencies>
+           
             <!-- JBoss distributes a complete set of Java EE 6 APIs including a Bill 
                 of Materials (BOM). A BOM specifies the versions of a "stack" (or a collection) 
                 of artifacts. We use this here so that we always get the correct versions 
@@ -81,6 +82,7 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+              
             <dependency>
                 <groupId>org.jboss.bom</groupId>
                 <artifactId>jboss-javaee-6.0-with-hibernate</artifactId>
@@ -88,21 +90,51 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            
         </dependencies>
     </dependencyManagement>
 
     <dependencies>
+        
+         <dependency>
+            <groupId>org.jboss.spec.javax.jms</groupId>
+            <artifactId>jboss-jms-api_1.1_spec</artifactId>
+            <scope>provided</scope>
+          </dependency>
+        
+        <dependency>
+          <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>2.2.1</version>
+            <type>jar</type>
+            <scope>compile</scope>
+          </dependency>
+          
+          <dependency>
+          <groupId>org.hibernate</groupId>
+          <artifactId>hibernate-core</artifactId>
+          <version>4.3.0.Final</version>
+           <exclusions> 
+            <exclusion>
+                <groupId>dom4j</groupId>
+                <artifactId>dom4j</artifactId>
+            </exclusion>
+           </exclusions>
+           </dependency>
+        
 
         <!-- First declare the APIs we depend on and need for compilation. All 
             of them are provided by JBoss AS 7 -->
 
         <!-- Import the CDI API, we use provided scope as the API is included in 
             JBoss AS 7 -->
+         
         <dependency>
             <groupId>javax.enterprise</groupId>
             <artifactId>cdi-api</artifactId>
             <scope>provided</scope>
         </dependency>
+        
 
         <!-- Import the Common Annotations API (JSR-250), we use provided scope 
             as the API is included in JBoss AS 7 -->
@@ -135,7 +167,6 @@
             <artifactId>jboss-ejb-api_3.1_spec</artifactId>
             <scope>provided</scope>
         </dependency>
-        
 
         <!-- JSR-303 (Bean Validation) Implementation -->
         <!-- Provides portable constraints such as @Email -->
@@ -199,27 +230,6 @@
             <artifactId>arquillian-protocol-servlet</artifactId>
             <scope>test</scope>
         </dependency>
-        
-        <dependency>
-            <groupId>org.jboss.spec.javax.jms</groupId>
-            <artifactId>jboss-jms-api_1.1_spec</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        
-        <dependency>
-          <groupId>org.hibernate</groupId>
-          <artifactId>hibernate-core</artifactId>
-          <version>4.3.0.Final</version>
-        </dependency>
-        
-        <dependency>
-          <groupId>redis.clients</groupId>
-            <artifactId>jedis</artifactId>
-            <version>2.2.1</version>
-            <type>jar</type>
-            <scope>compile</scope>
-          </dependency>
-        
 
     </dependencies>
 

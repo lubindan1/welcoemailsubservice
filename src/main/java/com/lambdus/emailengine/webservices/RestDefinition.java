@@ -38,7 +38,8 @@ public class RestDefinition {
 		request.setTemplateId(templateId);
 		request.setTokens(miscParams);
 		
-		MessageQueueProducer mqp = new MessageQueueProducer(request);
+		MessageQueueProducer mqp = new MessageQueueProducer();
+		mqp.addRequest(request);
 		mqp.initialize();
 		
 		ArrayList<String> response = new ArrayList<String>();
@@ -46,6 +47,7 @@ public class RestDefinition {
 		response.add(emailAddress);
 		response.add(String.valueOf(templateId));
 		response.add(String.valueOf(miscParams.size()));
+		response.add(mqp.getInfo());
 		
         return response;
         

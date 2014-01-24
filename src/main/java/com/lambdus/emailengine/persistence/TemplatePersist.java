@@ -10,11 +10,13 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
+import javax.xml.bind.annotation.XmlRootElement;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
 
 @Entity
+@XmlRootElement
 @Table(name = "templates", uniqueConstraints = @UniqueConstraint(columnNames = "id"))
 public class TemplatePersist implements Serializable {
    
@@ -23,25 +25,28 @@ public class TemplatePersist implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private Long id;
+    private int id;
 
     @NotNull
-    @NotEmpty 
+    @NotEmpty
+    @Column(name = "creative")
     private String creative;
 
     @NotNull
     @NotEmpty
+    @Column(name = "subjectline")
     private String subjectline;
 
     @NotNull
     @NotEmpty
+    @Column(name = "fromaddress")
     private String fromaddress;
 
-    public Long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -71,4 +76,3 @@ public class TemplatePersist implements Serializable {
 
 
 }
-
