@@ -11,6 +11,7 @@ import javax.jms.JMSException;
 import javax.jms.MessageProducer;
 import javax.jms.Queue;
 import javax.jms.Session;
+import javax.naming.InitialContext;
 
 import org.jboss.logging.Logger;
 
@@ -20,13 +21,13 @@ import com.lambdus.emailengine.webservices.RestDefinition;
 @Stateless
 @LocalBean
 public class MessageQueueProducer {
-	
-	private static final Logger log = Logger.getLogger(MessageQueueProducer.class.getName());
-	
-	@Resource(mappedName = "java:/ConnectionFactory")
+        
+    private static final Logger log = Logger.getLogger(MessageQueueProducer.class.getName());
+        
+    //@Resource(name = "java:/ConnectionFactory")
     private ConnectionFactory connectionFactory;
 
-    @Resource(mappedName = "java:/queue/transactionalemail")
+    //@Resource(name = "java:/queue/transactionalemail")
     private Queue queueTx;
     
     private EmailRequest request;
@@ -41,98 +42,100 @@ public class MessageQueueProducer {
     
     /*
     public MessageQueueProducer(EmailRequest request) {
-    	log.info(request.getTemplateId());
-    	this.request = request;
+            log.info(request.getTemplateId());
+            this.request = request;
     }
     */
     
     public void addRequest(EmailRequest request){
-    	
-    	log.info(request.getTemplateId());
-    	this.request = request;
-    	
+            
+            this.request = request;
+            
     }
     
     public void initialize(){
-    	// resolve the message assembly
-    	MessageAssembler ma = new MessageAssembler(this.request.getTemplateId(), this.request.getParameters());
-    	
-    	this.emailMessage.emailCreative = ma.getAssembledMessage();
-    	this.emailMessage.emailAddress = this.request.getEmailAddress();
-    	this.emailMessage.subjectLine = ma.getSubjectLine();
-    	this.emailMessage.fromAddress = ma.getFromAddress();
-    	
-    	startConnection();
-    	createMessage();
-    	sendMessage();
-    	
-    	
+            // resolve the message assembly
+            MessageAssembler ma = new MessageAssembler(this.request.getTemplateId(), this.request.getParameters());
+            
+            this.emailMessage.emailCreative = ma.getAssembledMessage();
+            this.emailMessage.emailAddress = this.request.getEmailAddress();
+            this.emailMessage.subjectLine = ma.getSubjectLine();
+            this.emailMessage.fromAddress = ma.getFromAddress();
+            this.emailMessage.fromName = ma.getFromName();
+            
+            startConnection();
+            createMessage();
+            sendMessage();
+            
+            
     }
  
     public void startConnection()
     {
-    	log.info("jms startConnection called");
-    	try
-    	{
+          log.info("jms startConnection called");
+          try
+          {
+          InitialContext ctx = new InitialContext();
+          connectionFactory = (ConnectionFactory) ctx.lookup("java:/ConnectionFactory");
+          queueTx = (Queue) ctx.lookup("java:/queue/transactionalemail");
           this.connection = this.connectionFactory.createConnection();
-          log.info("after connection");
           this.session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-          log.info("after session");
           this.destination = queueTx;
-          log.info("after destination = queue");
           this.messageProducer = session.createProducer(this.destination);
-          log.info("messageProducer created");
           this.connection.start();
-    	}
-    	catch (JMSException e) {
-    		log.info("jms exception");
-    	}
-    	catch (Exception ex) {
-    		log.info("general exception");
-    	}
-    	
+            }
+            catch (JMSException e) {
+                    log.info("jms exception");
+            }
+            catch (Exception ex) {
+                    log.info("general exception");
+            }
+            
     }
     
     public void createMessage()
     {
-    	log.info("jms createMessage called");
-    	try
-    	{
-    	  mapMessage = this.session.createMapMessage(); 
-    	  this.mapMessage.setString("emailAddress", emailMessage.emailAddress);
-    	  this.mapMessage.setString("emailCreative", emailMessage.emailCreative);
-    	  this.mapMessage.setString("subjectLine", emailMessage.subjectLine);
-    	  this.mapMessage.setString("fromAddress", emailMessage.fromAddress);
-    	  
-    	}
-    	catch (JMSException e) {
-    		
-    	}
+            try
+            {
+              mapMessage = this.session.createMapMessage(); 
+              this.mapMessage.setString("emailAddress", emailMessage.emailAddress);
+              this.mapMessage.setString("emailCreative", emailMessage.emailCreative);
+              this.mapMessage.setString("subjectLine", emailMessage.subjectLine);
+              this.mapMessage.setString("fromAddress", emailMessage.fromAddress);
+              this.mapMessage.setString("fromName", emailMessage.fromName);
+              
+            }
+            catch (JMSException e) {
+                    
+            }
     }
     
     public void sendMessage()
     {
-      log.info("jms sendMessage called");
       try
       {
-    	this.messageProducer.send(this.mapMessage);
+            this.messageProducer.send(this.mapMessage);
+            this.messageProducer.close();
+            this.session.close();
+            this.connection.close();
       }
-  	  catch (JMSException e) {
-		
-  	  }      
+      catch (JMSException jmse) {
+            log.info(jmse.getMessage());
+      }
+
     }
     
-	public String getInfo(){
-		
-		StringBuilder sb = new StringBuilder();
-		sb.append(this.emailMessage.emailCreative);
-		sb.append("---");
-		sb.append(this.emailMessage.emailAddress);
-		
-		
-		return sb.toString();
-		
-	}
-	
+        public String getInfo(){
+                
+                StringBuilder sb = new StringBuilder();
+                sb.append(this.emailMessage.emailCreative);
+                sb.append("---");
+                sb.append(this.emailMessage.emailAddress);
+                
+                
+                return sb.toString();
+                
+        }
+        
 
 }

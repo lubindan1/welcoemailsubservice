@@ -41,6 +41,11 @@ public class TemplatePersist implements Serializable {
     @NotEmpty
     @Column(name = "fromaddress")
     private String fromaddress;
+    
+    @NotNull
+    @NotEmpty
+    @Column(name = "fromname")
+    private String fromname;
 
     public int getId() {
         return id;
@@ -72,6 +77,14 @@ public class TemplatePersist implements Serializable {
 
     public void setFromaddress(String fromaddress) {
         this.fromaddress = fromaddress;
+    }
+    
+    public String getFromname() {
+        return fromname;
+    }
+
+    public void setFromname(String fromname) {
+        this.fromname = fromname;
     }
 
 
