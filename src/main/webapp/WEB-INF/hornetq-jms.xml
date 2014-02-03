@@ -6,6 +6,9 @@
             <jms-queue name="TransactionalMailQueue">
                 <entry name="/queue/transactionalemail"/>
             </jms-queue>
+            <jms-queue name="BatchMailQueue">
+                <entry name="/queue/batchemail"/>
+            </jms-queue>
         </jms-destinations>
     </hornetq-server>
 </messaging-deployment>

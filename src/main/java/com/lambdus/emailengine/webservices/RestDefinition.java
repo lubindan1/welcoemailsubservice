@@ -15,8 +15,12 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map.Entry;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
 
+import com.lambdus.emailengine.BatchProcessor;
+import com.lambdus.emailengine.BatchRequest;
 import com.lambdus.emailengine.EmailRequest;
 import com.lambdus.emailengine.MessageQueueProducer;
 
@@ -82,6 +86,38 @@ public class RestDefinition {
                 return rr;
         
         }
+        
+        
+        
+        @GET()
+        @Path("/sendbatch/json")
+        @Produces("application/json")
+        public List<String> sendBatchJson(@QueryParam("targetId") int targetId, @QueryParam("templateId") int templateId, @Context UriInfo uriInfo) {
+
+                MultivaluedMap<String, String> paramsMap = uriInfo.getQueryParameters();
+                HashMap<String,String> miscParams = collectMiscParameters(paramsMap);
+
+                BatchRequest request = new BatchRequest();
+                request.setTargetId(targetId);
+                request.setTemplateId(templateId);
+
+                //FIX: Make this Separate method
+                BatchProcessor bp = new BatchProcessor(request);
+                FutureTask<String> futureTask = new FutureTask<String>(bp);
+                ExecutorService executorService = Executors.newSingleThreadExecutor();
+                executorService.submit(futureTask); 
+              
+                
+                ArrayList<String> response = new ArrayList<String>();
+                response.add("OK");
+                response.add(String.valueOf(targetId));
+                response.add(String.valueOf(templateId));
+                
+                return response;
+        
+        }
+        
+        
         
         private HashMap<String,String> collectMiscParameters(MultivaluedMap<String, String> paramsMap)
         {
