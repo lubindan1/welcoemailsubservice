@@ -9,6 +9,7 @@ public class BatchTarget {
 	
 	public BatchTarget(String emailAddress){
 		this.emailAddress = emailAddress;
+		this.fields = new ArrayList<String>();
 	}
 		
 	public String getEmailAddress(){

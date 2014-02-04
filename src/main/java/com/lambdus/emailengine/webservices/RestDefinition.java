@@ -107,7 +107,6 @@ public class RestDefinition {
                 ExecutorService executorService = Executors.newSingleThreadExecutor();
                 executorService.submit(futureTask); 
               
-                
                 ArrayList<String> response = new ArrayList<String>();
                 response.add("OK");
                 response.add(String.valueOf(targetId));

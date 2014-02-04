@@ -63,9 +63,12 @@ public class BatchProcessor implements Callable<String> {
 
 			 while (rs.next()) {
 				 HashMap<String,String> fieldmap = new HashMap<String,String>();
-				 for (String f: batchtarget.getFields()){
-					 fieldmap.put(f, rs.getString(f));
-				  }
+				 if (batchtarget.getFields().size() > 0){
+				    for (String f: batchtarget.getFields())
+				      {
+					    fieldmap.put(f, rs.getString(f));
+				      }
+				 }
 				 userData.put(rs.getString(batchtarget.getEmailAddress()), fieldmap);
 			 }
 			 
@@ -82,8 +85,10 @@ public class BatchProcessor implements Callable<String> {
 	   public String call() throws Exception {
 		    String targetQueryText = fetchTarget();
 		    HashMap<String,Object> batchDirectiveHash = processQuery(targetQueryText, batchtarget);
-		    //pass batchDirectiveHash to MessageQueueProducer
-	        return Thread.currentThread().getName();
+		    BatchQueueProducer bqp = new BatchQueueProducer(batchDirectiveHash);
+		    int processed = bqp.processBatch();
+		    String batchResultInfo = String.format("%s %s",Thread.currentThread().getName(), String.valueOf(processed) );
+	        return batchResultInfo;
 	    }
 	 
 	
