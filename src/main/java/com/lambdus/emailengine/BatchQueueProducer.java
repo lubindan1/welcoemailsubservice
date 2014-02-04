@@ -1,6 +1,8 @@
 package com.lambdus.emailengine;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.ejb.LocalBean;
@@ -17,6 +19,7 @@ import javax.naming.InitialContext;
 
 import org.jboss.logging.Logger;
 
+import com.lambdus.emailengine.persistence.TemplatePersist;
 import com.lambdus.emailengine.webservices.RestDefinition;
 
 
@@ -32,40 +35,56 @@ public class BatchQueueProducer {
     
     private HashMap<String,Object> batchData; 
     private BatchRequest request;
-    private EmailMessage emailMessage = new EmailMessage();
     
     private MessageProducer messageProducer;
     private Connection connection = null;
     private Session session;
     private Destination destination;
-    private MapMessage mapMessage;
     
-    public BatchQueueProducer(HashMap<String,Object> batchData){
+    
+    public BatchQueueProducer(HashMap<String,Object> batchData, BatchRequest request){
+    	this.request = request;
     	this.batchData = batchData; 	
     }
     
     //DO MAIN STUFF HERE
     public int processBatch(){
+    	 
+    	 int totalProcessed = 0;
+    	 TemplatePersist templateData = MessageAssembler.retrieveTemplateFromDB(this.request.getTemplateId());
+    	 startConnection();
     	
-    	return 0;
+    	 Iterator<Map.Entry<String, Object>> it = batchData.entrySet().iterator();
+    	 while (it.hasNext()) {
+    		 Map.Entry recipientData = (Map.Entry) it.next();
+    		 String email = (String) recipientData.getKey();
+    		 HashMap<String,String> uniqueParams = (HashMap<String,String>) recipientData.getValue();
+    		 log.info("processBatch - " + email);
+    		 it.remove();
+    		 
+    		 String assembledMessage = MessageAssembler.replaceTokens(templateData.getCreative(), uniqueParams);
+    		 MapMessage jmsMessage = createJmsMessage(email, templateData, assembledMessage);
+    		 try{
+    		    this.messageProducer.send(jmsMessage);
+    		 }catch (JMSException jmse) {
+    	        log.error(jmse.getMessage());
+    	      }
+    		 
+    	 }
+    	 
+    	 //CLEAN UP
+    	 try{
+            this.messageProducer.close();
+            this.session.close();
+            this.connection.close();
+    	 }
+    	 catch (JMSException jmsce) {
+	        log.error(jmsce.getMessage());
+	      }
+    	
+    	return totalProcessed;
     }
     
-    public void initialize(){
-            // resolve the message assembly
-            MessageAssembler ma = new MessageAssembler(this.request.getTemplateId(), this.request.getParameters());
-            
-            this.emailMessage.emailCreative = ma.getAssembledMessage();
-            this.emailMessage.emailAddress = this.request.getEmailAddress();
-            this.emailMessage.subjectLine = ma.getSubjectLine();
-            this.emailMessage.fromAddress = ma.getFromAddress();
-            this.emailMessage.fromName = ma.getFromName();
-            
-            startConnection();
-            createMessage();
-            sendMessage();
-            
-            
-    }
  
     public void startConnection()
     {
@@ -90,49 +109,25 @@ public class BatchQueueProducer {
             
     }
     
-    public void createMessage()
+    public MapMessage createJmsMessage(String email, TemplatePersist templateData, String message)
     {
+    	MapMessage mapMessage = null;	
             try
             {
-              mapMessage = this.session.createMapMessage(); 
-              this.mapMessage.setString("emailAddress", emailMessage.emailAddress);
-              this.mapMessage.setString("emailCreative", emailMessage.emailCreative);
-              this.mapMessage.setString("subjectLine", emailMessage.subjectLine);
-              this.mapMessage.setString("fromAddress", emailMessage.fromAddress);
-              this.mapMessage.setString("fromName", emailMessage.fromName);
-              
+              mapMessage = this.session.createMapMessage();	
+              mapMessage.setString("emailAddress", email);
+              mapMessage.setString("emailCreative", message);
+              mapMessage.setString("subjectLine", templateData.getSubjectline());
+              mapMessage.setString("fromAddress", templateData.getFromaddress());
+              mapMessage.setString("fromName", templateData.getFromname());
             }
             catch (JMSException e) {
-                    
+              log.error(e.getMessage());      
             }
+            
+         return mapMessage;    
+            
     }
-    
-    public void sendMessage()
-    {
-      try
-      {
-            this.messageProducer.send(this.mapMessage);
-            this.messageProducer.close();
-            this.session.close();
-            this.connection.close();
-      }
-      catch (JMSException jmse) {
-            log.info(jmse.getMessage());
-      }
-
-    }
-    
-        public String getInfo(){
-                
-                StringBuilder sb = new StringBuilder();
-                sb.append(this.emailMessage.emailCreative);
-                sb.append("---");
-                sb.append(this.emailMessage.emailAddress);
-                
-                
-                return sb.toString();
-                
-        }
         
 
 }

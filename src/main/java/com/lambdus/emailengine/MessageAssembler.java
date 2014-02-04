@@ -38,7 +38,8 @@ public class MessageAssembler {
                 checkCache(templateId);
         }
         
-        public String replaceTokens(String template, HashMap<String, String> tokenKVPairs)
+        //CHANGED from public to public static
+        public static String replaceTokens(String template, HashMap<String, String> tokenKVPairs)
         {
                 Set<String> keySet = tokenKVPairs.keySet();
                 
@@ -91,7 +92,8 @@ public class MessageAssembler {
              
         }
         
-        private TemplatePersist retrieveTemplateFromDB(int templateId)
+        //CHANGED from private to public static
+        public static TemplatePersist retrieveTemplateFromDB(int templateId)
         {
           TemplatePersist result = null;
           try{

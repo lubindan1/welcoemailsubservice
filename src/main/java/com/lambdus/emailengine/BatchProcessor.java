@@ -18,14 +18,19 @@ public class BatchProcessor implements Callable<String> {
 	 private int targetId = 0;
 	 private int templateId = 0;
 	 BatchTarget batchtarget;
+	 BatchRequest request;
 	 
-	 private String jdbcHandle = "jdbc:mysql://localhost:3306/email_engine";
-	 private String dbusername = "dan";
-	 private String dbpassword = "lambdus2200";
+	 private static String jdbcHandle = "jdbc:mysql://localhost:3306/email_engine";
+	 private static String dbusername = "dan";
+	 private static String dbpassword = "lambdus2200";
+	 
+	 //Azure instance
+	 private static String azureConnection = "jdbc:sqlserver://v8st4k97ey.database.windows.net:1433;database=email_engine;user=email_engine@v8st4k97ey;password=!Lambdus2200;encrypt=true;hostNameInCertificate=*.database.windows.net;loginTimeout=30;";
 	 
 	
 	 public BatchProcessor(BatchRequest request)
 	 {
+		 this.request = request;
 	     this.targetId = request.getTargetId();
 	     this.templateId = request.getTemplateId();
 	     // HACK: Do BatchTarget config
@@ -36,7 +41,8 @@ public class BatchProcessor implements Callable<String> {
 	 {
 		ResultSet rs;
 		String queryText = "";
-	    try {	 
+	    try {
+	    	 log.info("Before JDBC conn call");
 		     Connection con = DriverManager.getConnection(jdbcHandle, dbusername, dbpassword);  
 		     Statement st = con.createStatement();
 		     String select = String.format("SELECT * FROM email_engine.targets WHERE id = %d", this.targetId);
@@ -56,8 +62,11 @@ public class BatchProcessor implements Callable<String> {
 	 {
 			ResultSet rs;
 		    HashMap<String,Object> userData = new HashMap<String,Object>();
-		 try {	 
-			 Connection con = DriverManager.getConnection(jdbcHandle, dbusername, dbpassword);  
+		 try {
+			 // Use this for production
+			 //Connection con = DriverManager.getConnection(jdbcHandle, dbusername, dbpassword);
+			 //Azure Test Conn String
+			 Connection con = DriverManager.getConnection(azureConnection);
 			 Statement stmt = con.createStatement();
 			 rs = stmt.executeQuery(query);
 
@@ -85,7 +94,7 @@ public class BatchProcessor implements Callable<String> {
 	   public String call() throws Exception {
 		    String targetQueryText = fetchTarget();
 		    HashMap<String,Object> batchDirectiveHash = processQuery(targetQueryText, batchtarget);
-		    BatchQueueProducer bqp = new BatchQueueProducer(batchDirectiveHash);
+		    BatchQueueProducer bqp = new BatchQueueProducer(batchDirectiveHash, request);
 		    int processed = bqp.processBatch();
 		    String batchResultInfo = String.format("%s %s",Thread.currentThread().getName(), String.valueOf(processed) );
 	        return batchResultInfo;
