@@ -40,26 +40,32 @@ public class BatchProcessor implements Callable<String> {
 	 public String fetchTarget()
 	 {
 		ResultSet rs;
+		Connection con;
+		Statement st;
 		String queryText = "";
 	    try {
+	    	 Class.forName("com.mysql.jdbc.Driver");
 	    	 log.info("Before fetTarget JDBC conn call");
-		     Connection con = DriverManager.getConnection(jdbcHandle, dbusername, dbpassword);
-		     log.info("DB conn catalog: " + con.getCatalog());
-		     Statement st = con.createStatement();
-		     String select = String.format("SELECT * FROM email_engine.targets WHERE id = %d", this.targetId);
+		     con = DriverManager.getConnection(jdbcHandle, dbusername, dbpassword);
+		     log.info(con);
+		     st = con.createStatement();
+		     String select = String.format("SELECT * FROM email_engine.targets WHERE id = %d;", this.targetId);
 		     log.info("Select statement for target: " + select);
 		     try{
 		     rs = st.executeQuery(select);
-		     queryText = rs.getString("queryText");
+		     log.info(rs);
+		     queryText = rs.getString("querytext");
 		     }
 		     catch(Exception e){
 		    	log.info(e.getMessage());
 		     }
+		     
 		     log.info("Query Text " + queryText);	     
 		     
 		} catch (SQLException e) {
-			
-			log.info(e.getMessage());
+			log.error(e.getMessage());
+		} catch(Exception e){
+			log.error(e.getMessage());
 		}
 	    
 		
