@@ -1,5 +1,6 @@
 package com.lambdus.emailengine;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -10,6 +11,7 @@ import java.util.HashMap;
 import java.util.concurrent.Callable;
 
 import org.jboss.logging.Logger;
+
 
 public class BatchProcessor implements Callable<String> {
 	
@@ -39,25 +41,34 @@ public class BatchProcessor implements Callable<String> {
 	
 	 public String fetchTarget()
 	 {
-		ResultSet rs;
-		Connection con;
-		Statement st;
+		ResultSet rs = null;
+		Connection con = null;
+		Statement st = null;
+		CallableStatement callableStatement = null;
 		String queryText = "";
 	    try {
 	    	 Class.forName("com.mysql.jdbc.Driver");
 	    	 log.info("Before fetTarget JDBC conn call");
 		     con = DriverManager.getConnection(jdbcHandle, dbusername, dbpassword);
-		     log.info(con);
-		     st = con.createStatement();
-		     String select = String.format("SELECT * FROM email_engine.targets WHERE id = %d;", this.targetId);
-		     log.info("Select statement for target: " + select);
+		     
+		     String sproc = "{call getTargetById(?)}";
+		     callableStatement = con.prepareCall(sproc);
+		     callableStatement.setInt(1, this.targetId);
+		     //st = con.createStatement();
+		     //String select = String.format("SELECT queryText FROM email_engine.targets WHERE id = %d;", this.targetId);
+		     
 		     try{
-		     rs = st.executeQuery(select);
-		     log.info(rs);
-		     queryText = rs.getString("querytext");
+		     //rs = st.executeQuery(select);
+		     boolean ex = callableStatement.execute();
+		     log.info("execute on DB: " + String.valueOf(ex));
+		     if (ex){
+		    	 rs = callableStatement.getResultSet();
+		     }
+		     rs.next();
+		     queryText = rs.getString("queryText");
 		     }
 		     catch(Exception e){
-		    	log.info(e.getMessage());
+		    	log.error(e.getMessage());
 		     }
 		     
 		     log.info("Query Text " + queryText);	     

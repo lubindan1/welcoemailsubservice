@@ -101,6 +101,13 @@
             <artifactId>jboss-jms-api_1.1_spec</artifactId>
             <scope>provided</scope>
           </dependency>
+          
+         <dependency>
+	      <groupId>javax.mail</groupId>
+	      <artifactId>javax.mail-api</artifactId>
+	      <version>1.5.1</version>
+         </dependency>
+            
         
         <dependency>
           <groupId>redis.clients</groupId>
