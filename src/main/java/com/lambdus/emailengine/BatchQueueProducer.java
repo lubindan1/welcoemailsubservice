@@ -42,18 +42,35 @@ public class BatchQueueProducer {
     private Destination destination;
     
     
-    public BatchQueueProducer(HashMap<String,Object> batchData, BatchRequest request){
+    public void initialize(HashMap<String,Object> batchData, BatchRequest request){
     	this.request = request;
     	this.batchData = batchData; 	
     }
     
     //DO MAIN STUFF HERE
     public int processBatch(){
-    	 
+    	 log.info("processBatch called");
     	 int totalProcessed = 0;
     	 TemplatePersist templateData = MessageAssembler.retrieveTemplateFromDB(this.request.getTemplateId());
+    	 log.info("target set size " + String.valueOf(batchData.size()) );
     	 startConnection();
     	
+    	 for (Map.Entry<String, Object> recipientData : batchData.entrySet()) {
+    		 
+    		 String email = recipientData.getKey();
+    		 HashMap<String,String> uniqueParams = (HashMap<String,String>) recipientData.getValue();
+    		 log.info("processBatch - " + email);
+    		 String assembledMessage = MessageAssembler.replaceTokens(templateData.getCreative(), uniqueParams);
+    		 MapMessage jmsMessage = createJmsMessage(email, templateData, assembledMessage);
+    		 try{
+    		    this.messageProducer.send(jmsMessage);
+    		 }catch (JMSException jmse) {
+    	        log.error(jmse.getMessage());
+    	      }
+    		 
+    	 }
+    	 
+    	 /*
     	 Iterator<Map.Entry<String, Object>> it = batchData.entrySet().iterator();
     	 while (it.hasNext()) {
     		 Map.Entry recipientData = (Map.Entry) it.next();
@@ -71,6 +88,7 @@ public class BatchQueueProducer {
     	      }
     		 
     	 }
+    	 */
     	 
     	 //CLEAN UP
     	 try{

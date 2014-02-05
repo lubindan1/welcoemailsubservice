@@ -36,8 +36,5 @@
 	<classpathentry kind="lib" path="C:/Users/Dan/Documents/Jars/javax.mail-1.5.1.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Dan/Documents/Jars/javax.mail-api-1.5.1.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Dan/Documents/Jars/smtp-1.5.1.jar"/>
-	<classpathentry kind="lib" path="C:/Users/DLubin.DEV/Documents/Jars/javax.mail-1.5.1.jar"/>
-	<classpathentry kind="lib" path="C:/Users/DLubin.DEV/Documents/Jars/javax.mail-api-1.5.1.jar"/>
-	<classpathentry kind="lib" path="C:/Users/DLubin.DEV/Documents/Jars/smtp-1.5.1.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

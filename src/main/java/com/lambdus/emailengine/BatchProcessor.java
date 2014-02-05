@@ -42,12 +42,21 @@ public class BatchProcessor implements Callable<String> {
 		ResultSet rs;
 		String queryText = "";
 	    try {
-	    	 log.info("Before JDBC conn call");
-		     Connection con = DriverManager.getConnection(jdbcHandle, dbusername, dbpassword);  
+	    	 log.info("Before fetTarget JDBC conn call");
+		     Connection con = DriverManager.getConnection(jdbcHandle, dbusername, dbpassword);
+		     log.info("DB conn catalog: " + con.getCatalog());
 		     Statement st = con.createStatement();
 		     String select = String.format("SELECT * FROM email_engine.targets WHERE id = %d", this.targetId);
+		     log.info("Select statement for target: " + select);
+		     try{
 		     rs = st.executeQuery(select);
 		     queryText = rs.getString("queryText");
+		     }
+		     catch(Exception e){
+		    	log.info(e.getMessage());
+		     }
+		     log.info("Query Text " + queryText);	     
+		     
 		} catch (SQLException e) {
 			
 			log.info(e.getMessage());
@@ -60,8 +69,9 @@ public class BatchProcessor implements Callable<String> {
 	 
 	 public HashMap<String,Object> processQuery(String query, BatchTarget batchtarget)
 	 {
-			ResultSet rs;
-		    HashMap<String,Object> userData = new HashMap<String,Object>();
+		log.info("Query " + query);
+		ResultSet rs;
+		HashMap<String,Object> userData = new HashMap<String,Object>();
 		 try {
 			 // Use this for production
 			 //Connection con = DriverManager.getConnection(jdbcHandle, dbusername, dbpassword);
@@ -71,6 +81,7 @@ public class BatchProcessor implements Callable<String> {
 			 rs = stmt.executeQuery(query);
 
 			 while (rs.next()) {
+				 log.info("Result set processing row " + String.valueOf(rs.getRow()) );
 				 HashMap<String,String> fieldmap = new HashMap<String,String>();
 				 if (batchtarget.getFields().size() > 0){
 				    for (String f: batchtarget.getFields())
@@ -94,7 +105,8 @@ public class BatchProcessor implements Callable<String> {
 	   public String call() throws Exception {
 		    String targetQueryText = fetchTarget();
 		    HashMap<String,Object> batchDirectiveHash = processQuery(targetQueryText, batchtarget);
-		    BatchQueueProducer bqp = new BatchQueueProducer(batchDirectiveHash, request);
+		    BatchQueueProducer bqp = new BatchQueueProducer();
+		    bqp.initialize(batchDirectiveHash, request);
 		    int processed = bqp.processBatch();
 		    String batchResultInfo = String.format("%s %s",Thread.currentThread().getName(), String.valueOf(processed) );
 	        return batchResultInfo;
