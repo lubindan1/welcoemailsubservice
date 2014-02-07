@@ -11,15 +11,15 @@ import javax.ejb.Stateful;
 
 //@EJB(name="batchCampaignController")
 @Stateful
-@Remote(BatchCampaignController.class)
-public class BatchCampaignController {
+@Remote(IBatchCampaignController.class)
+public class BatchCampaignController implements IBatchCampaignController {
 	
 	
 	private int templateId;
 	
 	private int targetId;
 	
-	
+	@Override
 	public void startCampaign(){
 
         BatchRequest request = new BatchRequest();
@@ -33,12 +33,13 @@ public class BatchCampaignController {
 		
 	}
 	
-	
+	@Override
     public void setTargetId(int targetId)
     {
             this.targetId = targetId;
     }
-    
+	
+	@Override
     public void setTemplateId(int templateId)
     {
             this.templateId = templateId;
