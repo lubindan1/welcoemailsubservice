@@ -24,6 +24,7 @@ import com.lambdus.emailengine.BatchRequest;
 import com.lambdus.emailengine.EmailRequest;
 import com.lambdus.emailengine.MessageQueueProducer;
 
+
 import org.jboss.logging.Logger;
 
 @Path("/service")

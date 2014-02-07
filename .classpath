@@ -38,5 +38,6 @@
 			<attribute name="owner.project.facets" value="java"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/DLubin.DEV/Documents/ExportedWARs/EmailEngineCore.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
