@@ -23,5 +23,9 @@ public class BatchTarget {
 	public ArrayList<String> getFields(){
 		return this.fields;
 	}
+	
+	public void setFields(ArrayList<String> fields){
+		this.fields = fields;
+	}
 
 }

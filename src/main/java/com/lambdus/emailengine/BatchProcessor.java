@@ -4,6 +4,7 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -64,8 +65,9 @@ public class BatchProcessor implements Callable<String> {
 		     if (ex){
 		    	 rs = callableStatement.getResultSet();
 		     }
-		     rs.next();
-		     queryText = rs.getString("queryText");
+		       while(rs.next()){
+		       queryText = rs.getString("queryText");
+		       }
 		     }
 		     catch(Exception e){
 		    	log.error(e.getMessage());
@@ -96,9 +98,10 @@ public class BatchProcessor implements Callable<String> {
 			 Connection con = DriverManager.getConnection(azureConnection);
 			 Statement stmt = con.createStatement();
 			 rs = stmt.executeQuery(query);
-
+			 
+			 this.batchtarget.setFields(collectBatchGroupFields(rs));
+			 
 			 while (rs.next()) {
-				 log.info("Result set processing row " + String.valueOf(rs.getRow()) );
 				 HashMap<String,String> fieldmap = new HashMap<String,String>();
 				 if (batchtarget.getFields().size() > 0){
 				    for (String f: batchtarget.getFields())
@@ -116,6 +119,24 @@ public class BatchProcessor implements Callable<String> {
 	 
 		 return userData;
 	 }
+	 
+	 
+	  private ArrayList<String> collectBatchGroupFields(ResultSet resultSet)
+	  {
+		  ArrayList<String> fields = new ArrayList<String>();
+		  try {
+			ResultSetMetaData rsmd = resultSet.getMetaData();
+			for(int i = 1; i <= rsmd.getColumnCount(); i++){
+				if(rsmd.getColumnName(i) != batchtarget.getEmailAddress()){
+				   fields.add(rsmd.getColumnName(i));
+				}
+			}
+		} catch (SQLException e) {
+			log.error(e.getMessage());
+		}
+		  
+		return fields;  
+	  }
 	 
 	 
 	   @Override
