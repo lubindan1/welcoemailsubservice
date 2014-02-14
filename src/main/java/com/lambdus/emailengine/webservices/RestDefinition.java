@@ -54,8 +54,8 @@ public class RestDefinition {
                 response.add("OK");
                 response.add(emailAddress);
                 response.add(String.valueOf(templateId));
-                response.add(String.valueOf(miscParams.size()));
-                response.add(mqp.getInfo());
+                //response.add(String.valueOf(miscParams.size()));
+                //response.add(mqp.getInfo());
                 
                 return response;
         
