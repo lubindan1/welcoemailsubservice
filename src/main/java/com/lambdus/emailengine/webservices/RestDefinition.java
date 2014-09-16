@@ -50,7 +50,12 @@ public class RestDefinition {
         @Produces("application/json")
         public List<String> sendTransactionalJson(@QueryParam("email") String emailAddress, @QueryParam("templateId") int templateId, @Context UriInfo uriInfo, @Context HttpServletRequest req) {
 
-                MultivaluedMap<String, String> paramsMap = uriInfo.getQueryParameters();
+        	ArrayList<String> response = new ArrayList<String>();
+        	MultivaluedMap<String, String> paramsMap = null;
+        	
+        	try{
+        		if(emailAddress != null && templateId != 0){
+                paramsMap = uriInfo.getQueryParameters();
                 HashMap<String,String> miscParams = collectMiscParameters(paramsMap);
 
                 EmailRequest request = new EmailRequest();
@@ -62,15 +67,22 @@ public class RestDefinition {
                 mqp.addRequest(request);
                 mqp.initialize();
                 
-                ArrayList<String> response = new ArrayList<String>();
                 response.add("OK");
                 response.add(emailAddress);
                 response.add(String.valueOf(templateId));
-                //response.add(String.valueOf(miscParams.size()));
-                //response.add(mqp.getInfo());
+        		}
+        		else{
+        			response.add("email and templateId are required parameters for this endpoint");
+        		}
                 
-                logRequest(paramsMap, req, "/sendtx/json");
-                return response;
+        	   }
+        	  catch(Exception ex){
+        		  response.add("Error occurred");
+        	  }
+                
+        	  logRequest(paramsMap, req, "/sendtx/json");
+        	 
+              return response;
         
         }
         
@@ -80,7 +92,11 @@ public class RestDefinition {
         @Produces("text/xml")
         public RequestResponse sendTransactionalXml(@QueryParam("email") String emailAddress, @QueryParam("templateId") int templateId, @Context UriInfo uriInfo, @Context HttpServletRequest req) {
 
-                MultivaluedMap<String, String> paramsMap = uriInfo.getQueryParameters();
+        	RequestResponse rr = new RequestResponse();
+        	MultivaluedMap<String, String> paramsMap = null;
+        	 try{
+        		if(emailAddress != null && templateId != 0){
+                paramsMap = uriInfo.getQueryParameters();
                 HashMap<String,String> miscParams = collectMiscParameters(paramsMap);
 
                 EmailRequest request = new EmailRequest();
@@ -92,14 +108,21 @@ public class RestDefinition {
                 mqp.addRequest(request);
                 mqp.initialize();
                 
-                RequestResponse rr = new RequestResponse();
-                
                 rr.setResult("OK");
                 rr.setEmailAddress(emailAddress);
-                
-                
-                logRequest(paramsMap, req, "/sendtx/xml");
-                return rr;
+        		}
+        		else{
+        			rr.setResult("email and templateId are required parameters for this endpoint");
+        		}
+        		
+        	 }
+        	 catch(Exception ex){
+        		 rr.setResult("Error occurred");
+        	 }
+        	 
+        	 logRequest(paramsMap, req, "/sendtx/xml");
+        	 
+             return rr;
         
         }
         
@@ -192,17 +215,19 @@ public class RestDefinition {
         	  .append(req.getRemoteAddr())
         	  .append(" : ");
 
-        	for (MultivaluedMap.Entry<String, List<String>> entry : requestData.entrySet()){
-        	  sb.append(entry.getKey()).append(" ").append(entry.getValue()).append(", ");
-        	}
-        	  sb.append("\n");
-            try{
-        	  File file = new File("/usr/local/share/apilogs/requests.log");
-        	  FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
-        	  BufferedWriter bw = new BufferedWriter(fw);
-        	  bw.write(sb.toString());
-        	  bw.close();
-            }catch(Exception e){log.error(e.getMessage());}
+        	   if (requestData != null){
+        	      for (MultivaluedMap.Entry<String, List<String>> entry : requestData.entrySet()){
+        	        sb.append(entry.getKey()).append(" ").append(entry.getValue()).append(", ");
+        	      }
+        	    }
+        	    sb.append("\n");
+               try{
+        	      File file = new File("/usr/local/share/apilogs/requests.log");
+        	      FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
+        	      BufferedWriter bw = new BufferedWriter(fw);
+        	      bw.write(sb.toString());
+        	      bw.close();
+                 }catch(Exception e){log.error(e.getMessage());}
 
         	}
         

@@ -3,6 +3,7 @@ package com.lambdus.emailengine.webservices;
 
 import java.util.Set;
 import java.util.HashSet;
+
 import javax.ws.rs.core.Application;
 
 public class JaxRsInitializer extends Application {
