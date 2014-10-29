@@ -78,6 +78,7 @@ public class RestDefinition {
         	   }
         	  catch(Exception ex){
         		  response.add("Error occurred");
+        		  log.error(ex.getMessage());
         	  }
                 
         	  logRequest(paramsMap, req, "/sendtx/json");
@@ -118,6 +119,7 @@ public class RestDefinition {
         	 }
         	 catch(Exception ex){
         		 rr.setResult("Error occurred");
+        		 log.error(ex.getMessage());
         	 }
         	 
         	 logRequest(paramsMap, req, "/sendtx/xml");
