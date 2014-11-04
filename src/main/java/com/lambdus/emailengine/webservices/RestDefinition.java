@@ -54,7 +54,7 @@ public class RestDefinition {
         	MultivaluedMap<String, String> paramsMap = null;
         	
         	try{
-        		if(emailAddress != null && templateId != 0 && !(emailAddress.equals("bademail@none.com")) ){
+        		if(emailAddress != null && templateId != 0 && !(emailAddress.toLowerCase().equals("bademail@none.com")) ){
                 paramsMap = uriInfo.getQueryParameters();
                 HashMap<String,String> miscParams = collectMiscParameters(paramsMap);
 
