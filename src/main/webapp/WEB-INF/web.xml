@@ -19,7 +19,7 @@
   </servlet-mapping>
   <context-param>
     <param-name>javax.ws.rs.Application</param-name>
-    <param-value>com.lambdus.emailengine.webservices.JaxRsInitializer</param-value>
+    <param-value>com.welcohealth.email.service.JaxRsInitializer</param-value>
   </context-param>
   <listener>
     <listener-class>org.jboss.resteasy.plugins.server.servlet.ResteasyBootstrap</listener-class>

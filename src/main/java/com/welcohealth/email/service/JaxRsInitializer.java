@@ -1,4 +1,4 @@
-package com.lambdus.emailengine.webservices;
+package com.welcohealth.email.service;
 
 
 import java.util.Set;
@@ -11,7 +11,7 @@ public class JaxRsInitializer extends Application {
         private Set<Object> singletons = new HashSet<Object>();
         private Set<Class<?>> empty = new HashSet<Class<?>>();
         public JaxRsInitializer(){
-             singletons.add(new RestDefinition());
+             singletons.add(new UserRestDefinition());
         }
         @Override
         public Set<Class<?>> getClasses() {

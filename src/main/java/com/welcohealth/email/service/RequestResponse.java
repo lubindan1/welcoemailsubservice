@@ -1,4 +1,4 @@
-package com.lambdus.emailengine.webservices;
+package com.welcohealth.email.service;
 
 import javax.xml.bind.annotation.XmlAttribute; 
 import javax.xml.bind.annotation.XmlElement; 
