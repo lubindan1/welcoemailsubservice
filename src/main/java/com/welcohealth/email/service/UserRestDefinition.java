@@ -17,6 +17,8 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -25,6 +27,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.TimeZone;
 import java.util.Map.Entry;
+
+
 
 
 
@@ -41,7 +45,7 @@ public class UserRestDefinition {
     	@Path("/adduser/json")
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
-        public Response addUser(User user, @Context UriInfo uriInfo, @Context HttpServletRequest req) {
+        public Response addUser(User user, @Context UriInfo uriInfo,  @Context HttpServletRequest req) {
 
         	ArrayList<String> response = new ArrayList<String>();
         	MultivaluedMap<String, String> paramsMap = null;
@@ -57,10 +61,11 @@ public class UserRestDefinition {
         		  log.error(ex.getMessage());
         		  return Response.serverError().build();
         	  }
-                
-        	  logRequest(req, "/adduser/json");
+              
+        	        	  
+        	logRequest(user.getEmail(), req.getRemoteHost(), req.getRemoteAddr(), "/adduser/json");
         	 
-        	  return Response.status(200).entity(response).build();
+        	return Response.status(200).entity(response).build();
         
         }
         
@@ -83,7 +88,7 @@ public class UserRestDefinition {
         
         
         
-        private void logRequest(HttpServletRequest req, String endpoint){
+        private void logRequest(String userEmail, String remoteHost, String remoteIp, String endpoint){
 
         	  Date timeNow = new Date();
         	  SimpleDateFormat ft = new SimpleDateFormat ("E yyyy.MM.dd hh:mm:ss a zzz");
@@ -94,17 +99,11 @@ public class UserRestDefinition {
         	  .append(" ")
         	  .append(endpoint)
         	  .append(" ")
-        	  .append(req.getRemoteHost())
+        	  .append(remoteHost)
         	  .append(" ")
-        	  .append(req.getRemoteAddr())
-        	  .append(" : ");
-        	  try {
-        		    BufferedReader reader = req.getReader();
-        		    String line = null;
-        		    while ((line = reader.readLine()) != null){
-        		    	sb.append(line);
-        		    }
-        	   } catch (Exception e) { log.error(e.getMessage()); }    
+        	  .append(remoteIp)
+        	  .append(" : ")
+        	  .append(userEmail);
 
         	   sb.append("\n");
                try{
