@@ -16,6 +16,8 @@ import javax.ws.rs.core.UriInfo;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,18 +30,19 @@ import java.util.Iterator;
 import java.util.TimeZone;
 import java.util.Map.Entry;
 
-
-
-
-
-
 import org.jboss.logging.Logger;
+
+import redis.clients.jedis.Jedis;
 
 @Path("/service")
 public class UserRestDefinition {
 
         
         private static final Logger log = Logger.getLogger(UserRestDefinition.class.getName());
+        private static final String CONFIG_PATH = "/etc/welcoservice.conf"; 
+        private static final String sprocKeyPrefix = "SPKEY"; 
+        private static final String dataObjectPrefix = "DAOKEY"; 
+       
         
         @POST
     	@Path("/adduser/json")
@@ -64,11 +67,119 @@ public class UserRestDefinition {
               
         	        	  
         	logRequest(user.getEmail(), req.getRemoteHost(), req.getRemoteAddr(), "/adduser/json");
-        	 
+        	
         	return Response.status(200).entity(response).build();
         
         }
         
+        @POST
+    	@Path("/adduser/dailyjackpot/json")
+        @Consumes(MediaType.APPLICATION_JSON)
+        @Produces(MediaType.APPLICATION_JSON)
+        public Response addUser(TheDailyJackpotUser user, @Context UriInfo uriInfo,  @Context HttpServletRequest req) {
+
+        	ArrayList<String> response = new ArrayList<String>();
+        	MultivaluedMap<String, String> paramsMap = null;
+        	
+        	try{
+        		response.add(user.getEmail());
+                paramsMap = uriInfo.getQueryParameters();   
+                
+                EmailDAO.loadData("TheDailyJackpot_Email_Add", user);
+                
+        	   }
+        	  catch(Exception ex){
+        		  log.error(ex.getMessage());
+        		  return Response.serverError().build();
+        	  }
+              
+        	        	  
+        	logRequest(user.getEmail(), req.getRemoteHost(), req.getRemoteAddr(), "/adduser/json");
+        	
+        	return Response.status(200).entity(response).build();
+        
+        }
+        
+        
+        @POST
+    	@Path("/addsurvey/json")
+        @Consumes(MediaType.APPLICATION_JSON)
+        @Produces(MediaType.APPLICATION_JSON)
+        public Response addUser(HealthSurvey survey, @Context UriInfo uriInfo,  @Context HttpServletRequest req) {
+
+        	ArrayList<String> response = new ArrayList<String>();
+        	MultivaluedMap<String, String> paramsMap = null;
+        	
+        	try{
+        		response.add("OK");
+                paramsMap = uriInfo.getQueryParameters();   
+                
+                EmailDAO.loadData("dbo.HealthSurvey_Add", survey);
+                
+        	   }
+        	  catch(Exception ex){
+        		  log.error(ex.getMessage());
+        		  return Response.serverError().build();
+        	  }
+              
+        	        	  
+        	logRequest(String.valueOf(survey.getSessionid()), req.getRemoteHost(), req.getRemoteAddr(), "/addsurvey/json");
+        	
+        	return Response.status(200).entity(response).build();
+        
+        }
+        
+        
+        
+        private HashMap<String,String[]> getConfig(){
+        	
+        	 HashMap<String,String[]> hm = new HashMap<String,String[]>();
+			 try {
+				FileReader fr = new FileReader(CONFIG_PATH);
+        	    BufferedReader br = new BufferedReader(fr);
+        	    String sLine = "";
+        	    while((sLine = br.readLine()) != null){
+        		    String[] configs = sLine.split("::");
+        		    String[] sarr = new String[2];
+        		    sarr[0] = configs[1];
+        		    sarr[1] = configs[2];
+        		    hm.put(configs[0], sarr);
+        	    }
+        	  
+			  } catch (Exception e) {
+					e.printStackTrace();
+			  }
+        	  
+        	 return hm;
+        }
+        
+    	private String fetchFromRedis(String configKey){
+    		
+    		Jedis redis = new Jedis("localhost");
+    		String rval = "";
+    		
+    		try{
+    		  rval  = redis.get(configKey);
+    		  return rval;
+    		}
+    		catch (Exception e){
+    			return rval;
+    		}
+    		
+    	}	
+    	
+        private static void addToRedis(String key, String value)
+        {
+            try{	
+               Jedis jedis = new Jedis("localhost");
+               jedis.set(key, value);
+               jedis.expire(key, 3600);
+               }
+            catch (Exception e){
+               
+            }
+          
+        }
         
         private HashMap<String,String> collectMiscParameters(MultivaluedMap<String, String> paramsMap)
         {
