@@ -189,7 +189,7 @@ public class EmailDAO {
 			 if (Arrays.asList(thedailyjackpotuserfields).contains(fieldName)){
 			  
 			    String methodString = String.format("get%s", fieldName.replaceFirst(String.valueOf(fieldName.charAt(0)), String.valueOf(Character.toUpperCase(fieldName.charAt(0)))) );
-			    Method method = Class.forName(User.class.getName()).getDeclaredMethod(methodString);
+			    Method method = Class.forName(TheDailyJackpotUser.class.getName()).getDeclaredMethod(methodString);
 			  
 		        if (field.getType() == String.class) {
 		        	
@@ -292,7 +292,7 @@ public class EmailDAO {
 			 if (Arrays.asList(surveyfields).contains(fieldName)){
 			  
 			    String methodString = String.format("get%s", fieldName.replaceFirst(String.valueOf(fieldName.charAt(0)), String.valueOf(Character.toUpperCase(fieldName.charAt(0)))) );
-			    Method method = Class.forName(User.class.getName()).getDeclaredMethod(methodString);
+			    Method method = Class.forName(HealthSurvey.class.getName()).getDeclaredMethod(methodString);
 			  
 		        if (field.getType() == String.class) {
 		        	

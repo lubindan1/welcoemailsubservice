@@ -76,7 +76,7 @@ public class UserRestDefinition {
     	@Path("/adduser/dailyjackpot/json")
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
-        public Response addUser(TheDailyJackpotUser user, @Context UriInfo uriInfo,  @Context HttpServletRequest req) {
+        public Response addDailyJackpotUser(TheDailyJackpotUser user, @Context UriInfo uriInfo,  @Context HttpServletRequest req) {
 
         	ArrayList<String> response = new ArrayList<String>();
         	MultivaluedMap<String, String> paramsMap = null;
@@ -94,7 +94,7 @@ public class UserRestDefinition {
         	  }
               
         	        	  
-        	logRequest(user.getEmail(), req.getRemoteHost(), req.getRemoteAddr(), "/adduser/json");
+        	logRequest(user.getEmail(), req.getRemoteHost(), req.getRemoteAddr(), "/adduser/dailyjackpot/json");
         	
         	return Response.status(200).entity(response).build();
         
@@ -105,7 +105,7 @@ public class UserRestDefinition {
     	@Path("/addsurvey/json")
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
-        public Response addUser(HealthSurvey survey, @Context UriInfo uriInfo,  @Context HttpServletRequest req) {
+        public Response addSurvey(HealthSurvey survey, @Context UriInfo uriInfo,  @Context HttpServletRequest req) {
 
         	ArrayList<String> response = new ArrayList<String>();
         	MultivaluedMap<String, String> paramsMap = null;

@@ -2,7 +2,7 @@ package com.welcohealth.email.service;
 
 public class HealthSurvey {
 	
-    private int sessionid;
+    private Long sessionid;
     private String children;
     private String active;
     private String healthinsurance;
@@ -12,10 +12,10 @@ public class HealthSurvey {
     private String diabetic;
     private String pain;
     
-	public int getSessionid(){
+	public Long getSessionid(){
 		return sessionid;
 	}
-	public void setSessionid(int sessionid){
+	public void setSessionid(Long sessionid){
 		this.sessionid = sessionid;
 	}
 	
