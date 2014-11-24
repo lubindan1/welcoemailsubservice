@@ -57,7 +57,8 @@ public class UserRestDefinition {
         		response.add(user.getEmail());
                 paramsMap = uriInfo.getQueryParameters();   
                 
-                EmailDAO.loadData("dbo.HealthEmail_Add", user);
+                EmailDAO.loadData("dbo.HealthEmail_Add", user, "welco");
+                EmailDAO.loadData("dbo.HealthEmail_Add", user, "azure");
                 
         	   }
         	  catch(Exception ex){

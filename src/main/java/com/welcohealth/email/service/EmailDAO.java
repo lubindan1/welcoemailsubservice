@@ -22,6 +22,8 @@ public class EmailDAO {
 	private static String dbusername = "StrongMail";
 	private static String dbpassword = "Str0ngMai!";
 	
+	private static String azureConnection = "jdbc:sqlserver://k22cep04af.database.windows.net:1433;database=email_engine;user=emailengine@k22cep04af;password=!Welco2200;encrypt=true;hostNameInCertificate=*.database.windows.net;loginTimeout=30;";
+	
 	private static String[] userfields = {
 		"timestamp",
 		"email",
@@ -61,7 +63,7 @@ public class EmailDAO {
 	};
 	
 	
-	static public void loadData(String storedProc, User user){
+	static public void loadData(String storedProc, User user, String dbsystem){
 		
 		CallableStatement callableStatement = null;
 		//PreparedStatement pstmt = null;
@@ -74,8 +76,13 @@ public class EmailDAO {
 		  String sproc = String.format("{call %s(%s)}", storedProc, sprocParamCount);
 		  //String insert = "INSERT INTO [StrongMail].[dbo].[SUCCESS_LOG] ( [Datestamp], [Email], [OUTBOUNDIP], [OUTBOUNDHOST], [MXIP], [MXHOST], [TemplateId], [Uuid] ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ? )";
 		  Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-		  con = DriverManager.getConnection(jdbcHandle, dbusername, dbpassword);
-		  //con = DriverManager.getConnection(azureConnection);
+		  if(dbsystem.equals("azure")){
+			 con = DriverManager.getConnection(azureConnection);
+		  }
+		  else{
+		     con = DriverManager.getConnection(jdbcHandle, dbusername, dbpassword);
+		  }
+		  
 		  callableStatement = con.prepareCall(sproc);
 		  //pstmt = con.prepareStatement(insert);
 		  
